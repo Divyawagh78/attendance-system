@@ -186,7 +186,7 @@ Frontend runs at `http://localhost:5173`
 
 ## Author
 
-**Shivam Wagh**
+**Divya wagh**
 - GitHub: [@Divyawagh78](https://github.com/Divyawagh78)
 - LinkedIn: [your-linkedin-url]
 
