@@ -190,17 +190,4 @@ Frontend runs at `http://localhost:5173`
 - GitHub: [@Divyawagh78](https://github.com/Divyawagh78)
 - LinkedIn: [your-linkedin-url]
 
-## License
 
-MIT License
-```
-
----
-
-Now take screenshots of each page and save them in a folder called `screenshots` inside the project root. The README references them so they'll show up on GitHub automatically.
-
-Then push the README:
-```
-git add README.md
-git commit -m "Add README with project documentation"
-git push
