@@ -33,6 +33,9 @@ A full-stack web application for managing college attendance with role-based acc
 
 
 ## Features
+Report management
+<img width="704" height="573" alt="image" src="https://github.com/user-attachments/assets/44a6ea7f-e882-4f42-835e-a8a720cce612" />
+
 
 ### Student
 - View attendance percentage per subject
