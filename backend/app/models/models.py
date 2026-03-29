@@ -19,6 +19,16 @@ class Subject(Base):
     teacher_id = Column(Integer, ForeignKey("users.id"))
     teacher = relationship("User")
 
+class Enrollment(Base):
+    __tablename__ = "enrollments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("users.id"))
+    subject_id = Column(Integer, ForeignKey("subjects.id"))
+
+    student = relationship("User", foreign_keys=[student_id])
+    subject = relationship("Subject")
+
 class Attendance(Base):
     __tablename__ = "attendance"
 
@@ -39,7 +49,7 @@ class LeaveRequest(Base):
     subject_id = Column(Integer, ForeignKey("subjects.id"))
     date = Column(Date, nullable=False)
     reason = Column(Text, nullable=False)
-    status = Column(String, default="pending")  # pending, approved, rejected
+    status = Column(String, default="pending")
 
     student = relationship("User", foreign_keys=[student_id])
     subject = relationship("Subject")

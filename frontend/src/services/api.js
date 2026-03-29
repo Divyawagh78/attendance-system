@@ -31,3 +31,10 @@ export const bulkMarkAttendance = (subjectId, date, attendanceList) =>
 export const getMyLeaveRequests = () => API.get("/leave/my-requests");
 export const getPendingLeaves = () => API.get("/leave/pending");
 export const actionLeave = (leaveId, action) => API.put(`/leave/action/${leaveId}?action=${action}`);
+export const enrollInSubject = (subjectId) => API.post("/enrollments/enroll", { subject_id: subjectId });
+export const unenrollFromSubject = (subjectId) => API.delete(`/enrollments/unenroll/${subjectId}`);
+export const getMySubjects = () => API.get("/enrollments/my-subjects");
+export const getEnrolledStudents = (subjectId) => API.get(`/enrollments/subject/${subjectId}/students`);
+export const getAllEnrollments = () => API.get("/enrollments/all");
+export const deleteStudent = (studentId) => API.delete(`/attendance/admin/delete-student/${studentId}`);
+export const getAllTeachers = () => API.get("/attendance/admin/teachers");

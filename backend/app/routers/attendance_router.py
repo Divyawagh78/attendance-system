@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.models import Attendance, User, Subject
+from app.models.models import Attendance, User, Subject, LeaveRequest, Enrollment
 from app.schemas import AttendanceCreate, AttendanceResponse
 from app.dependencies import get_current_user
 from datetime import date
@@ -118,6 +118,7 @@ def get_attendance_report(subject_id: int, db: Session = Depends(get_db), curren
             "is_present": attendance.is_present
         })
     return result
+
 @router.get("/admin/summary")
 def get_admin_summary(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if current_user.role != "admin":
@@ -136,6 +137,7 @@ def get_admin_summary(db: Session = Depends(get_db), current_user: User = Depend
         ).count()
         percentage = round((present / total) * 100, 2) if total > 0 else 0
         summary.append({
+            "student_id": student.id,
             "student_name": student.name,
             "email": student.email,
             "total_classes": total,
@@ -150,3 +152,34 @@ def get_admin_summary(db: Session = Depends(get_db), current_user: User = Depend
         "total_subjects": len(subjects),
         "student_summary": summary
     }
+
+@router.delete("/admin/delete-student/{student_id}")
+def delete_student(
+    student_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admins only")
+
+    student = db.query(User).filter(
+        User.id == student_id,
+        User.role == "student"
+    ).first()
+
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    db.query(Attendance).filter(Attendance.student_id == student_id).delete()
+    db.query(Enrollment).filter(Enrollment.student_id == student_id).delete()
+    db.query(LeaveRequest).filter(LeaveRequest.student_id == student_id).delete()
+    db.delete(student)
+    db.commit()
+
+    return {"message": f"Student {student.name} deleted successfully"}
+@router.get("/admin/teachers")
+def get_all_teachers(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admins only")
+    teachers = db.query(User).filter(User.role == "teacher").all()
+    return [{"id": t.id, "name": t.name, "email": t.email} for t in teachers]

@@ -1,121 +1,318 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAdminSummary } from "../services/api";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getAdminSummary, deleteStudent, getAllTeachers } from "../services/api";
 
 export default function AdminDashboard() {
   const [summary, setSummary] = useState(null);
+  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [activeTab, setActiveTab] = useState("students");
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    getAdminSummary()
-      .then((res) => setSummary(res.data))
+    loadData();
+  }, []);
+
+  const loadData = () => {
+    Promise.all([getAdminSummary(), getAllTeachers()])
+      .then(([summaryRes, teachersRes]) => {
+        setSummary(summaryRes.data);
+        setTeachers(teachersRes.data);
+      })
       .catch(() => setSummary(null))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  const handleDelete = async (id, name) => {
+    if (confirmDelete !== id) {
+      setConfirmDelete(id);
+      return;
+    }
+
+    try {
+      await deleteStudent(id);
+      setMessage(`${name} deleted`);
+      setConfirmDelete(null);
+      loadData();
+    } catch {
+      setMessage("Delete failed");
+      setConfirmDelete(null);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/");
+    navigate("/login");
   };
 
+  const statusBadge = (s) => {
+    if (s.total_classes === 0)
+      return { label: "No Data", bg: "#f1f5f9", color: "#64748b", border: "#e2e8f0" };
+
+    if (s.alert)
+      return { label: "At Risk", bg: "#fee2e2", color: "#dc2626", border: "#fecaca" };
+
+    return { label: "Good", bg: "#dcfce7", color: "#16a34a", border: "#a7f3d0" };
+  };
+
+  const navItems = [
+    { label: "Dashboard", path: "/admin" },
+  ];
+
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
+    <div style={styles.wrapper}>
+
+      {/* Sidebar */}
+      <aside style={styles.sidebar}>
+        <div style={styles.brand}>AttendX</div>
+
+        {navItems.map((item) => (
+          <button
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            style={{
+              ...styles.navItem,
+              background:
+                location.pathname === item.path ? "#4f46e5" : "transparent",
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+
+        <button style={styles.logout} onClick={handleLogout}>
+          Logout
+        </button>
+      </aside>
+
+      {/* Main */}
+      <main style={styles.main}>
         <h2 style={styles.title}>Admin Dashboard</h2>
-        <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
-      </div>
 
-      {loading ? (
-        <p style={styles.muted}>Loading...</p>
-      ) : !summary ? (
-        <p style={styles.muted}>Failed to load data</p>
-      ) : (
-        <>
-          <div style={styles.statsRow}>
-            <div style={styles.statCard}>
-              <p style={styles.statNumber}>{summary.total_students}</p>
-              <p style={styles.statLabel}>Students</p>
-            </div>
-            <div style={styles.statCard}>
-              <p style={styles.statNumber}>{summary.total_teachers}</p>
-              <p style={styles.statLabel}>Teachers</p>
-            </div>
-            <div style={styles.statCard}>
-              <p style={styles.statNumber}>{summary.total_subjects}</p>
-              <p style={styles.statLabel}>Subjects</p>
-            </div>
-            <div style={styles.statCard}>
-              <p style={{ ...styles.statNumber, color: "#ef4444" }}>
-                {summary.student_summary.filter((s) => s.alert).length}
-              </p>
-              <p style={styles.statLabel}>At Risk</p>
-            </div>
-          </div>
+        {message && <div style={styles.toast}>{message}</div>}
 
-          <div style={styles.card}>
-            <h3 style={styles.sectionTitle}>Student Attendance Overview</h3>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Student</th>
-                  <th style={styles.th}>Email</th>
-                  <th style={styles.th}>Present</th>
-                  <th style={styles.th}>Total</th>
-                  <th style={styles.th}>Percentage</th>
-                  <th style={styles.th}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.student_summary.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ ...styles.td, textAlign: "center", color: "#9ca3af" }}>
-                      No attendance records yet
-                    </td>
-                  </tr>
-                ) : (
-                  summary.student_summary.map((s, i) => (
-                    <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#f9fafb" : "#fff" }}>
-                      <td style={styles.td}>{s.student_name}</td>
-                      <td style={styles.td}>{s.email}</td>
-                      <td style={styles.td}>{s.present}</td>
-                      <td style={styles.td}>{s.total_classes}</td>
-                      <td style={styles.td}>{s.percentage}%</td>
-                      <td style={styles.td}>
+        {loading ? (
+          <p style={styles.muted}>Loading...</p>
+        ) : !summary ? (
+          <p style={styles.muted}>Failed to load data</p>
+        ) : (
+          <>
+            {/* Stats */}
+            <div style={styles.stats}>
+              <div style={styles.statCard}>
+                <p style={styles.statNum}>{summary.total_students}</p>
+                <p>Students</p>
+              </div>
+              <div style={styles.statCard}>
+                <p style={styles.statNum}>{summary.total_teachers}</p>
+                <p>Teachers</p>
+              </div>
+              <div style={styles.statCard}>
+                <p style={styles.statNum}>{summary.total_subjects}</p>
+                <p>Subjects</p>
+              </div>
+              <div style={styles.statCard}>
+                <p style={{ ...styles.statNum, color: "#ef4444" }}>
+                  {summary.student_summary.filter((s) => s.alert).length}
+                </p>
+                <p>At Risk</p>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div style={styles.tabs}>
+              {["students", "teachers"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    ...styles.tab,
+                    background: activeTab === tab ? "#4f46e5" : "#e5e7eb",
+                    color: activeTab === tab ? "#fff" : "#374151",
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Students */}
+            {activeTab === "students" && (
+              <div style={styles.card}>
+                {summary.student_summary.map((s) => {
+                  const st = statusBadge(s);
+
+                  return (
+                    <div key={s.student_id} style={styles.row}>
+                      <div>
+                        <p style={styles.name}>{s.student_name}</p>
+                        <p style={styles.email}>{s.email}</p>
+                      </div>
+
+                      <div style={styles.rowRight}>
                         <span style={{
                           ...styles.badge,
-                          backgroundColor: s.alert ? "#fef2f2" : s.total_classes === 0 ? "#f3f4f6" : "#f0fdf4",
-                          color: s.alert ? "#ef4444" : s.total_classes === 0 ? "#9ca3af" : "#10b981",
+                          background: st.bg,
+                          color: st.color,
+                          border: `1px solid ${st.border}`,
                         }}>
-                          {s.total_classes === 0 ? "No Data" : s.alert ? "At Risk" : "Good"}
+                          {st.label}
                         </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
+
+                        <button
+                          style={{
+                            ...styles.delete,
+                            background:
+                              confirmDelete === s.student_id
+                                ? "#ef4444"
+                                : "#fee2e2",
+                            color:
+                              confirmDelete === s.student_id
+                                ? "#fff"
+                                : "#dc2626",
+                          }}
+                          onClick={() =>
+                            handleDelete(s.student_id, s.student_name)
+                          }
+                        >
+                          {confirmDelete === s.student_id ? "Confirm" : "Delete"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Teachers */}
+            {activeTab === "teachers" && (
+              <div style={styles.card}>
+                {teachers.map((t) => (
+                  <div key={t.id} style={styles.row}>
+                    <div>
+                      <p style={styles.name}>{t.name}</p>
+                      <p style={styles.email}>{t.email}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </main>
     </div>
   );
 }
 
 const styles = {
-  container: { maxWidth: "900px", margin: "0 auto", padding: "24px" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" },
-  title: { fontSize: "22px", color: "#1a1a2e" },
-  logoutBtn: { padding: "8px 16px", backgroundColor: "#ef4444", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" },
-  statsRow: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "20px" },
-  statCard: { backgroundColor: "#fff", padding: "20px", borderRadius: "12px", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.07)" },
-  statNumber: { fontSize: "32px", fontWeight: "600", color: "#4f46e5", margin: "0 0 4px" },
-  statLabel: { fontSize: "13px", color: "#6b7280", margin: 0 },
-  card: { backgroundColor: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.07)" },
-  sectionTitle: { fontSize: "16px", color: "#374151", marginBottom: "16px" },
-  table: { width: "100%", borderCollapse: "collapse" },
-  th: { textAlign: "left", padding: "10px 12px", fontSize: "13px", color: "#6b7280", borderBottom: "1px solid #e5e7eb" },
-  td: { padding: "10px 12px", fontSize: "14px", color: "#1a1a2e" },
-  badge: { padding: "3px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "500" },
-  muted: { color: "#9ca3af", fontSize: "14px" },
+  wrapper: { display: "flex", height: "100vh", background: "#f1f5f9" },
+
+  sidebar: {
+    width: "240px",
+    background: "#0f172a",
+    color: "#fff",
+    padding: "20px",
+    display: "flex",
+    flexDirection: "column",
+  },
+
+  brand: { fontSize: "20px", marginBottom: "30px" },
+
+  navItem: {
+    padding: "12px",
+    borderRadius: "8px",
+    border: "none",
+    color: "#fff",
+    textAlign: "left",
+    marginBottom: "8px",
+    cursor: "pointer",
+  },
+
+  logout: {
+    marginTop: "auto",
+    padding: "12px",
+    background: "#ef4444",
+    border: "none",
+    borderRadius: "8px",
+    color: "#fff",
+    cursor: "pointer",
+  },
+
+  main: { flex: 1, padding: "30px", overflowY: "auto" },
+
+  title: { marginBottom: "20px" },
+
+  stats: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+    gap: "16px",
+    marginBottom: "20px",
+  },
+
+  statCard: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "12px",
+    textAlign: "center",
+  },
+
+  statNum: { fontSize: "24px", fontWeight: "600", color: "#4f46e5" },
+
+  tabs: { display: "flex", gap: "10px", marginBottom: "15px" },
+
+  tab: {
+    padding: "8px 14px",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+
+  card: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "12px",
+  },
+
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "10px 0",
+    borderBottom: "1px solid #f1f5f9",
+  },
+
+  rowRight: {
+    display: "flex",
+    gap: "10px",
+    alignItems: "center",
+  },
+
+  name: { margin: 0, fontWeight: "500" },
+  email: { margin: 0, fontSize: "12px", color: "#64748b" },
+
+  badge: {
+    padding: "4px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+
+  delete: {
+    padding: "6px 12px",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+
+  toast: {
+    background: "#dbeafe",
+    padding: "10px",
+    borderRadius: "8px",
+    marginBottom: "10px",
+  },
+
+  muted: { color: "#9ca3af" },
 };

@@ -1,10 +1,14 @@
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 import bcrypt
+from dotenv import load_dotenv
+import os
 
-SECRET_KEY = "your-secret-key-change-this-in-production"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 600
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 600))
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
