@@ -9,32 +9,39 @@ A full-stack web application for managing college attendance with role-based acc
 ## Screenshots
 
 ### Login Page
-<img width="458" height="537" alt="image" src="https://github.com/user-attachments/assets/9c7f720a-5257-43f9-beb2-7bb90131d535" />
+<img width="1600" height="665" alt="image" src="https://github.com/user-attachments/assets/123934db-3796-455c-9f72-08240674a4a6" />
+
 
 
 ### Teacher Dashboard
-<img width="625" height="720" alt="image" src="https://github.com/user-attachments/assets/3edda600-e290-43cc-a9aa-261965a9546c" />
+<img width="1600" height="784" alt="image" src="https://github.com/user-attachments/assets/0c4c2072-ae0e-4f85-8a55-c5fed482a9e0" />
+ />
 
 ### Bulk Attendance
-<img width="632" height="596" alt="image" src="https://github.com/user-attachments/assets/0b98bf19-0dc4-4512-8999-97f1ff7dc9a5" />
+<img width="1600" height="791" alt="image" src="https://github.com/user-attachments/assets/553be87c-a210-49de-bb24-54cc0eb8c46b" />
+ />
 
 
 ### Student Dashboard
-<img width="703" height="449" alt="image" src="https://github.com/user-attachments/assets/4bff4a5d-a59d-498f-a78e-2ed70e8cc6df" />
+<img width="1600" height="788" alt="image" src="https://github.com/user-attachments/assets/185e1d59-fec0-4aca-8185-7312cc9d4f0c" />
+ />
 
 
 ### Admin Dashboard
-<img width="825" height="628" alt="image" src="https://github.com/user-attachments/assets/d2a11e8d-16a6-4bf4-bd9f-d2cc014d0012" />
+<img width="1600" height="797" alt="image" src="https://github.com/user-attachments/assets/d459ce8f-497a-45a4-ab92-0533b3aaf45f" />
+ />
 
 
 ### Leave Management
-<img width="600" height="629" alt="image" src="https://github.com/user-attachments/assets/17b6005e-0709-4ba0-879c-a1d46fe36cc3" />
-<img width="610" height="581" alt="image" src="https://github.com/user-attachments/assets/c6e21d47-d23d-466d-8479-bb7de9251bd4" />
+<img width="1600" height="790" alt="image" src="https://github.com/user-attachments/assets/d3d81a65-f496-40cd-9dbe-6fda2952f162" />
+ /><img width="1600" height="792" alt="image" src="https://github.com/user-attachments/assets/c30d3740-f028-47af-a7a7-8e3670441c75" />
+ />
 
 
 ## Features
 Report management
-<img width="704" height="573" alt="image" src="https://github.com/user-attachments/assets/44a6ea7f-e882-4f42-835e-a8a720cce612" />
+<img width="1600" height="773" alt="image" src="https://github.com/user-attachments/assets/cb3aa031-0eb6-4432-a04e-12b49709ad33" />
+ />
 
 
 ### Student
